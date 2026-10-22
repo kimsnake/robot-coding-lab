@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>바퀴 회전 실험 | Robot Coding Lab</title><style>
+:root{font-family:system-ui,-apple-system,'Noto Sans KR',sans-serif;color:#17243a;background:#f3f6fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1040px;margin:auto;padding:24px}a{color:#2a65bd;text-decoration:none;font-weight:700}h1{margin:14px 0 8px;font-size:clamp(26px,4vw,37px)}.sub{color:#59677c;line-height:1.65}.layout{display:grid;grid-template-columns:1.3fr .85fr;gap:18px;margin-top:22px}.panel{background:#fff;border:1px solid #dfe6f0;border-radius:20px;padding:22px;box-shadow:0 5px 20px #1d315108}.scene{position:relative;border-radius:14px;background:#f8fbff;border:1px solid #e3ebf5;overflow:hidden}canvas{display:block;width:100%;height:auto;aspect-ratio:1/1}.label{font-size:14px;font-weight:750;margin-bottom:9px}.readout{float:right;font-variant-numeric:tabular-nums;color:#2563b8}input[type=range]{width:100%;accent-color:#2674d9;cursor:pointer}.control{margin-bottom:22px}.modebar{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:0 0 23px}.modebar button{padding:11px 5px}.modebar button.selected{background:#2563eb;color:#fff;border-color:#2563eb}.help{font-size:13px;color:#59677c;line-height:1.6;margin:0 0 20px}.speedbox{border-top:1px solid #e6edf5;padding-top:17px}.buttons{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}button{border:1px solid #cfddf0;background:#f5f9ff;color:#23466d;border-radius:10px;padding:10px 13px;font-size:14px;font-weight:750;cursor:pointer}button:hover{background:#e6f1ff}button.primary{background:#2563eb;color:white;border-color:#2563eb}button.primary:hover{background:#174cc6}.note{background:#edf6ff;padding:15px;border-radius:12px;line-height:1.7;color:#36526f;font-size:14px}.legend{display:flex;gap:18px;flex-wrap:wrap;color:#58697e;font-size:13px;margin:12px 0}.dot{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:middle;margin-right:5px}.repeatbox{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;color:#34465e;margin:12px 0}.repeatbox input{width:18px;height:18px;accent-color:#2563eb}.status{font-size:14px;line-height:1.65;color:#34465e}.stat{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}footer{color:#718096;font-size:12px;padding:22px 0}@media(max-width:760px){.layout{grid-template-columns:1fr}.wrap{padding:16px}.panel{padding:16px}}
+</style></head><body><div class="wrap"><a href="../../">← 실험실로 돌아가기</a><h1>🛞 바퀴 회전 실험</h1><p class="sub">각도·시간·회전 수 중 하나를 선택하고 왼쪽·오른쪽 바퀴를 조절해 보세요. <strong>로봇이 지나간 경로</strong>가 선으로 남아요.</p><div class="layout"><section class="panel"><div class="scene"><canvas id="stage" width="600" height="600" aria-label="로봇의 이동 경로 시뮬레이션"></canvas></div><div class="legend"><span><i class="dot" style="background:#f43f5e"></i>로봇이 지나간 경로</span><span><i class="dot" style="background:#facc15"></i>로봇 앞쪽</span></div><div class="status" id="status" aria-live="polite">실행 기준을 선택하고 왼쪽·오른쪽 값을 조절해 보세요.</div></section><section class="panel"><div class="label">실행 기준 선택</div><div class="modebar" role="group" aria-label="모터 실행 기준"><button class="selected" data-mode="degrees" aria-pressed="true">각도 (°)</button><button data-mode="seconds" aria-pressed="false">시간 (초)</button><button data-mode="rotations" aria-pressed="false">회전 수</button></div><p class="help" id="modeHelp">바퀴 자체가 회전하는 각도를 설정해요. 로봇 몸체의 방향 각도와는 달라요.</p><div class="control"><div class="label">왼쪽 바퀴 <span class="readout" id="leftValue">360°</span></div><input id="left" type="range" min="-720" max="720" step="15" value="360" aria-label="왼쪽 바퀴 설정"><input id="leftNumber" type="number" min="-720" max="720" step="15" value="360" aria-label="왼쪽 바퀴 값 직접 입력" style="width:100%;margin-top:9px;padding:8px;border:1px solid #cfddf0;border-radius:8px"></div><div class="control"><div class="label">오른쪽 바퀴 <span class="readout" id="rightValue">360°</span></div><input id="right" type="range" min="-720" max="720" step="15" value="360" aria-label="오른쪽 바퀴 설정"><input id="rightNumber" type="number" min="-720" max="720" step="15" value="360" aria-label="오른쪽 바퀴 값 직접 입력" style="width:100%;margin-top:9px;padding:8px;border:1px solid #cfddf0;border-radius:8px"></div><div class="control speedbox" id="speedBox" hidden><div class="label">모터 속도 <span class="readout" id="speedValue">1.0 회전/초</span></div><input id="speed" type="range" min="0.25" max="2" step="0.25" value="1" aria-label="모터 속도"><p class="help">시간 모드에서는 속도 × 시간으로 바퀴 회전 수를 계산해요. 음수 시간은 반대 방향 회전을 뜻해요.</p></div><label class="repeatbox"><input id="repeat" type="checkbox"> 자동 반복 실행 (끝나면 처음부터 다시)</label><div class="buttons"><button class="primary" id="play">▶ 실행</button><button id="stop" disabled>■ 정지</button><button id="reset">↺ 처음으로</button></div><div class="note"><strong>생각해 볼 질문</strong><p>두 바퀴가 같은 방향으로 돌면 어떻게 될까요? 서로 반대 방향으로 돌면 어떨까요?</p><p>바퀴가 한 바퀴 도는 것과 로봇이 한 바퀴 도는 것은 같을까요?</p></div><p class="sub" style="font-size:13px">가정: 바퀴 둘레 17.5cm, 바퀴 사이 거리 12cm. 실제 교구와 다를 수 있으며, 마찰·미끄러짐은 반영하지 않았습니다.</p></section></div><footer>Robot Coding Lab · 바퀴 회전과 로봇 방향 전환은 서로 다른 개념입니다.</footer></div><script>
+const c=document.getElementById('stage'),ctx=c.getContext('2d');
+const L=document.getElementById('left'),R=document.getElementById('right'),LN=document.getElementById('leftNumber'),RN=document.getElementById('rightNumber'),lv=document.getElementById('leftValue'),rv=document.getElementById('rightValue'),status=document.getElementById('status'),speed=document.getElementById('speed');
+const circumference=17.5,track=12,pxPerCm=5;
+const modes={degrees:{min:-720,max:720,step:15,value:360,unit:'°',help:'바퀴 자체가 회전하는 각도를 설정해요. 로봇 몸체의 방향 각도와는 달라요.'},seconds:{min:-5,max:5,step:0.25,value:1,unit:'초',help:'모터가 작동하는 시간을 설정해요. 속도가 같으면 시간이 길수록 더 많이 회전해요.'},rotations:{min:-2,max:2,step:0.1,value:1,unit:'회전',help:'바퀴를 몇 바퀴 회전시킬지 설정해요. 1회전은 바퀴가 360° 도는 거예요.'}};
+let mode='degrees',pose,trail,animation=0,running=false,loopCount=0;
+function startPose(){pose={x:300,y:460,a:-Math.PI/2};trail=[{x:pose.x,y:pose.y}]}
+function fmt(v){return mode==='degrees'?String(Number(v)):Number(v).toFixed(mode==='rotations'?1:2).replace(/0+$/,'').replace(/\.$/,'')}
+function values(){lv.textContent=fmt(L.value)+' '+modes[mode].unit;rv.textContent=fmt(R.value)+' '+modes[mode].unit;document.getElementById('speedValue').textContent=Number(speed.value).toFixed(2).replace(/0+$/,'').replace(/\.$/,'')+' 회전/초'}
+function selectMode(next){stop();mode=next;const config=modes[mode];for(const el of [L,R,LN,RN]){el.min=config.min;el.max=config.max;el.step=config.step;el.value=config.value}document.querySelectorAll('[data-mode]').forEach(b=>{let selected=b.dataset.mode===mode;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected))});document.getElementById('modeHelp').textContent=config.help;document.getElementById('speedBox').hidden=mode!=='seconds';values();reset()}
+function draw(){
+  ctx.clearRect(0,0,600,600);ctx.fillStyle='#f8fbff';ctx.fillRect(0,0,600,600);
+  ctx.strokeStyle='#e3ebf5';ctx.lineWidth=1;
+  for(let i=0;i<=600;i+=30){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.moveTo(0,i);ctx.lineTo(600,i);ctx.stroke()}
+  // Draw the robot first, then the full trajectory on TOP of it.
+  ctx.save();ctx.translate(pose.x,pose.y);ctx.rotate(pose.a+Math.PI/2);
+  ctx.fillStyle='#34304c';ctx.fillRect(-23,-22,10,44);ctx.fillRect(13,-22,10,44);
+  ctx.fillStyle='#a78bfa';ctx.strokeStyle='#5b21b6';ctx.lineWidth=3;
+  ctx.beginPath();ctx.roundRect(-17,-26,34,52,10);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#facc15';ctx.beginPath();ctx.moveTo(0,-19);ctx.lineTo(-8,-3);ctx.lineTo(8,-3);ctx.closePath();ctx.fill();ctx.restore();
+  if(trail.length>1){
+    ctx.strokeStyle='#f43f5e';ctx.lineWidth=4.5;ctx.lineJoin='round';ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(trail[0].x,trail[0].y);
+    for(const p of trail.slice(1))ctx.lineTo(p.x,p.y);
+    ctx.stroke();
+  }
+  // Current location remains visible even when the path crosses the robot.
+  ctx.beginPath();ctx.arc(pose.x,pose.y,5,0,Math.PI*2);
+  ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#be123c';ctx.lineWidth=2;ctx.stroke();
+}
+function stop(){
+  cancelAnimationFrame(animation);animation=0;running=false;
+  document.getElementById('play').disabled=false;
+  document.getElementById('stop').disabled=true;
+}
+function reset(){stop();loopCount=0;startPose();draw();status.textContent='시작 위치로 돌아왔어요. 값을 바꾸고 실행해 보세요.'}
+function rotations(value){let v=Number(value);return mode==='degrees'?v/360:mode==='seconds'?v*Number(speed.value):v}
+function run(){
+  stop();loopCount=0;running=true;
+  document.getElementById('play').disabled=true;
+  document.getElementById('stop').disabled=false;
+  const dL=rotations(L.value)*circumference,dR=rotations(R.value)*circumference;
+  const steps=150,stepL=dL/steps,stepR=dR/steps;
+  function cycle(){
+    if(!running)return;
+    startPose();let index=0;loopCount++;
+    status.textContent=`${loopCount}번째 실행 중… 궤적을 관찰해 보세요.`;
+    function frame(){
+      if(!running)return;
+      for(let j=0;j<2&&index<steps;j++,index++){
+        const ds=(stepL+stepR)/2,da=(stepR-stepL)/track;
+        pose.x+=Math.cos(pose.a+da/2)*ds*pxPerCm;
+        pose.y+=Math.sin(pose.a+da/2)*ds*pxPerCm;
+        pose.a+=da;trail.push({x:pose.x,y:pose.y});
+      }
+      draw();
+      if(index<steps){animation=requestAnimationFrame(frame)}
+      else{
+        const deg=Math.round((dR-dL)/track*180/Math.PI);
+        status.textContent=`${loopCount}번째 완료! 왼쪽 ${rotations(L.value).toFixed(2)}회전, 오른쪽 ${rotations(R.value).toFixed(2)}회전 · 로봇 방향 변화 약 ${deg}°.`;
+        if(document.getElementById('repeat').checked){
+          // Keep the completed path visible briefly before restarting.
+          const until=performance.now()+650;
+          function wait(){if(!running)return;if(performance.now()<until){animation=requestAnimationFrame(wait)}else{cycle()}}
+          animation=requestAnimationFrame(wait);
+        }else{stop()}
+      }
+    }
+    draw();animation=requestAnimationFrame(frame);
+  }
+  cycle();
+}
+for(const [range,num] of [[L,LN],[R,RN]]){range.addEventListener('input',()=>{num.value=range.value;values()});num.addEventListener('change',()=>{let n=Number(num.value);if(!Number.isFinite(n))n=0;n=Math.max(Number(range.min),Math.min(Number(range.max),n));range.value=n;num.value=n;values()})}
+speed.addEventListener('input',values);document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>selectMode(b.dataset.mode)));
+document.getElementById('play').addEventListener('click',run);document.getElementById('stop').addEventListener('click',()=>{stop();status.textContent='정지했어요. 현재 위치와 궤적을 유지합니다.'});document.getElementById('reset').addEventListener('click',reset);startPose();values();draw();
+</script></body></html>
