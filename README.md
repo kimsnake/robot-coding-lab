@@ -13,7 +13,7 @@
 2. GitHub 저장소의 **Settings → Pages**로 이동합니다.
 3. **Build and deployment → Deploy from a branch**를 선택합니다.
 4. Branch를 **main**, Folder를 **/(root)**로 설정하고 저장합니다.
-5. 공개 주소: `https://<GitHub-사용자이름>.github.io/<저장소이름>/`
+5. 공개 주소: `https://kimsnake.github.io/robot-coding-lab/`
 
 별도 서버나 빌드 도구 없이 HTML, CSS, JavaScript만으로 작동합니다.
 
